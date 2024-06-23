@@ -23,16 +23,20 @@ knitr::opts_chunk$set(eval = TRUE,
 ```
 
 # About the Course
-1. 
+1. Applying machine learning (ML) methods to economic issues presents challenges. ML excels at **predicting observable outcomes** using patterns in data. However, ML models are often considered "black boxes," lacking transparency in explaining how predictions are made and the mechanisms driving them. In contrast, economic analysis focuses on understanding causal effects, such as how changes in one variable impact another. Thus, as opposed to ML's robustness in stable environments, economists utilize **counterfactual analysis** to estimate the effects of policies or interventions. Economic methods are structured to uncover underlying mechanisms driving outcomes, relying on theoretical arguments and assumptions to argue with a high probability that the estimates (the prediction for the casual effects) are unbiased, consistent, and efficient.
 
-2. 
+
+2. To interpret linear regression coefficients causally, it is essential to rely on underlying assumptions aligned with counterfactual analysis principles, similar to those applied in randomized controlled trials (RCTs). Central to causal inference is the critical assumption of independence between the treatment variable and unobserved factors. This assumption is crucial as it cannot be empirically tested using available data and necessitates theoretical justification. ML relies on the assumption of a stable data generating process (DGP) across both the training and test sets. This means ML methods are not adjusted for instances when the DGP changes; for example, if a factor changes and the entire system shifts accordingly. In other words, counterfactual analysis challenges this underlying assumption of a stable DGP. Note that assuming independence of observations is required in both disciplines, but it can be refined as needed.
+
 
 3. 
+  + 3a.
+  + 3b.
 
 # The “Tidyverse”
 
 ## 1. Loading (and installing if needed) libraries with pacman
-```{r, echo=FALSE}
+```{r}
 pacman::p_load(tidyverse, kableExtra, usethis, git2r)
 ```
 
@@ -70,16 +74,13 @@ ggplot(mtcars, aes(x = hp, y = mpg, color = cyl)) +
 # Git & GitHub
 
 ## 1. Introduction to git
-```{r}
-# Using the usethis library I loaded above using pacman
+I do not need to use commands in this exercise because I have already created my current R project with a Git repository.
 
-git2r::init()
+## 2. Stagging, Committing and Pushing
+I can stage, commit and push in several ways:
+a. Using GitHub desktop
+b. Using the Git section in R studio
+c. Also in R studio, staging and committing using the `r use_git()` and pushing using `r use_github()` (from `r {usethis}` package) in the console.
 
-use_git_config(
-  scope = "project",
-  user.name = "assafy18",
-  user.email = "asaf.yancu@hotmail.com"
-)
-
-```
-
+## 3. Track changes
+I can track changes in my repository on GitHub. By clicking on a specific file, I can see green lines for additions and red lines for deletions. I can follow these changes through the commits.
