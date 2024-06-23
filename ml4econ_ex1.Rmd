@@ -1,0 +1,164 @@
+---
+title: "ML4econ - Exercise 1"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    theme: flatly
+    highlight: haddock
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    keep_md: false
+  pdf_document:
+    toc: true
+    toc_depth: '4'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = TRUE,
+                      echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+Hi everyone and welcome to the ml4econ course (stands for Machine Learning for economists)!
+
+### About the Course
+
+In this course we will go over ML (stands for "machine learning") algorithms that can be used in economics. The first part of the course is focused on some classical models in ML (you are probably familiar with some of them). The second part of the course will be focused on causality in ML. Since economics is mostly focused on causality, the absence of it from common ML framework avoids the vast adoption of it by economists. Therefore, we will go over some of those ML algorithms and then will look at some adaptations of them to causal inference framework.
+
+#### Exercises
+
+1.  ML tools have shown some incredible successes over last decades in multiple areas. It tackles both novel problems, as: Image Processing, Voice Recognition, User Recommendation, Natural Language Processing - and more classical problems like classification and regression problems. Why can't we simply apply those methods to economic issues - policy problems, for example?
+
+2.  Linear Regression model itself doesn't imply causality. What else is needed in order to use the regression coefficients as causal? Why is it not quite easy to get it in ML?
+
+3.  Due to convenience, economists mostly use linear models. Since we are going to use other structural forms, let's discuss those assumptions explicitly. It'll give us better understanding of the differences among models.
+
+    a.  What is the intuitive meaning of the linearity assumption?
+
+    b.  What is the intuitive meaning of the separability assumption?
+
+    c.  What are the encapsulated meanings of $X \sim \mathcal{N}(\mu,\,\sigma^{2})\,$?
+
+### R
+
+Throughout the course, we will be using the `R` programming language both in class and in problem sets. If you are not familiar with it or if you're not enough experienced in `R` programming, there are some recommended `R` courses, here are some recommended links:
+
+1.  You can find some introduction[in here](https://www.guru99.com/r-programming-introduction-basics.html).
+2.  This is a somewhat [Extensive book](http://www.john-ros.com/Rcourse/) on `R` written by Jonathan Rosenblatt from Ben-Gurion University. It covers many topics in `R`, from basics like what is `R` to very advanced topics like parallel computing.
+3.  Make sure that you take the [datacamp course](https://www.datacamp.com/courses/introduction-to-the-tidyverse?utm_source=adwords_ppc&utm_campaignid=9039963993&utm_adgroupid=92159846780&utm_device=c&utm_keyword=r%20basics&utm_matchtype=e&utm_network=g&utm_adpostion=&utm_creative=255795296110&utm_targetid=aud-299261629654:kwd-310539422068&utm_loc_interest_ms=&utm_loc_physical_ms=1007978&gclid=Cj0KCQiAnL7yBRD3ARIsAJp_oLaMDa2jnueQTJ-37pAVAPQjteahRPlDgNLlRLM2ROs_I449NzRBY64aAntaEALw_wcB). We all have access to it.
+
+#### Exercises
+
+1.  If you don't have it yet, make sure to install `R`, available [here](https://cran.r-project.org/bin/windows/base/).
+
+### RStudio
+
+RStudio is an "integrated development environment" (IDE) for `R`. IDE "is a software application that provides comprehensive facilities to computer programmers for software development. Normally, IDE consists of at least a source code editor, build automation tools and a debugger." [(Wikipedia)](https://en.wikipedia.org/wiki/Integrated_development_environment).
+
+Most of `R` practitioners use RStudio so you can use the same materials to learn RStudio abilities. Here's [intro](https://data-flair.training/blogs/rstudio-tutorial/).
+
+#### Exercises
+
+1.  If you don't have it yet, make sure to install RStudio, can be found [here](https://rstudio.com/products/rstudio/download/#download).
+
+### The "Tidyverse"
+
+The Tidyverse is a bundle of packages (can't recall what a package is? check it out in the former sections), which makes the use of `R` much easier, both practically and conceptually. It contains multiple packages that serve multiple ends:
+
+-   `dplyr` for data manipulation
+-   `tidyr` for tidying data
+-   `ggplot2` for visualizing data
+-   `readr` for reading different sources of data
+-   `stringr` for dealing with regular expressions
+-   `lubridate` for dealing with dates
+
+and much more. Since the `tidyverse` covers a lot of topics we can't cover it here. The main package to focus on is the the `dplyr` package. The `dplyr` package provides a powerful SQL-like toolkit for data manipulation. What are the main functions you should know?
+
+-   `filter`: filters the data by row-wise conditions
+-   `select` allows you to select columns from dataframes
+-   `group_by` perform operation on defined groups
+-   `mutate` creates new columns
+-   `summarise` reduces multiple values down to a single summary
+
+In addition, you should get familiar with `magrittr`'s (another package from the tidyverse) "pipe" operator `%>%` - this operator "plucks" the variable before the pipe in the first argument of the following function.
+
+Here are some tidyverse useful links: [here](https://r4ds.had.co.nz/transform.html) and [here](https://www.tidyverse.org/packages/).
+
+Another useful `tidyverse` package is `ggplot2`, THE go-to package to visualize your data in R. The basic philosophy is layers stacking. You can define almost every element in the way you visualize your data. Check [here](https://ggplot2.tidyverse.org/) and [here](http://r-statistics.co/Complete-Ggplot2-Tutorial-Part1-With-R-Code.html) for some more information.
+
+[Kieran Healy's Data Visualization](https://socviz.co/) e-book is also highly recommended.
+
+#### Exercises
+
+1.  Install and load the `tidyverse` and `kableExtra` packages:
+
+```{r message=FALSE}
+# install.packages(c("tidyverse", "kableExtra"))
+
+library(tidyverse)  # for wrangling and visualizing data
+library(kableExtra) # for fancy tables
+```
+
+2.  Load the `iris` dataset by using `data(iris)`. Now, using a `tidy` vocabulary: select the sepal columns and the species' names. Next, calculate the mean of the sepal length per species. Name the column "Average_Sepal_Length". Make sure you are using the pipe operator throughout.
+
+```{r dplyr}
+data(iris)
+
+iris %>% 
+  select(c(starts_with("Sepal"), Species)) %>% 
+  group_by(Species) %>% 
+  summarise(Average_Sepal_Length = mean(Sepal.Length)) %>% 
+  kable() %>%
+  kable_styling()
+```
+
+3.  Load the `mtcars` dataset by using `data(mtcars)`. Now create a graph that plots `hp` on the x-axis and `mpg` on the y-axis. Add trend line in light-blue color, and make the color differ by `cyl` (the number of cylinders). hint: you may want to first set `cyl` as a factor (i.e., a categorical variable).
+
+```{r ggplot2}
+data("mtcars")
+
+mtcars %>% 
+  mutate(cyl = as_factor(cyl)) %>% 
+  ggplot(aes(x = hp, y = mpg, color = cyl)) +
+  geom_point()+ 
+  geom_smooth(method="lm", size=1)
+```
+
+### Git & GitHub
+
+Git is a tool for version control. It allows documentation and reproducibility of your code. Unfortunately, `R` users do not give enough attention to version control, probably due to the non-production nature of their work. (Here is a Git  [manual](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control) to learn from).
+
+GitHub is a GUI (Graphical User Interface) for Git. It allows running all Git commands in a graphical way. It also has repositories which help document and reproduce the work.
+
+As mentioned, Git is a tool for version control. The basic flow is as follows: First, as a one time action install Git & Github ([here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) & [here](https://github.com/)). Then set configurations. When starting a project, which we would like to document, we initialize a Git repository - this repository documents the history of our project. How does Git know what to document? Everything we ask it to. Say there are some changes in one of the files (both code and text files), and we're happy with these changes. In order to indicate that we want this file to be a part of our project's history - we `stage` this file and then `commit` all the files that have been staged. Now, Git creates a unique identifier of this commit, it "remembers" what was the project look like when we committed. The commit command opens the door to useful concepts like branching, merging, rebasing etc. but we will not deal with it now.
+
+Practically, we will use the `usethis` package for using Git from `R`.
+
+#### Excercises
+
+1.  Configure: Introduce yourself to git. First, install the package `usethis`. Then, load it and use the `use_git_config` function to introduce yourself to git, as is shown in the following code lines. Though, I highly recommend you to use all git commands through the command line, as appears in ["Git Intro"](https://moodle4.cs.huji.ac.il/hu23/pluginfile.php/619269/mod_resource/content/1/Git%20Intro%20%28ml4econ%29.pdf) presentation on Moodle - it's much easier to use than through coding (in my opinion). 
+
+``` r
+# install.packages("usethis")
+# install.packages("git2r")
+# install.packages("credentials")
+
+library(usethis)
+
+git2r::init()
+
+use_git_config(
+  scope = "project",
+  user.name = "Your Name",
+  user.email = "your_name@example.org"
+)
+```
+
+2.  Open a new script, add some changes and save. Now, try to stage and commit.
+
+3.  Try checking what changes were made until the last commit.
+
+Good luck!!

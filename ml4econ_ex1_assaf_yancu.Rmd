@@ -1,0 +1,85 @@
+---
+title: "ML4econ - Exercise 1"
+author: "Assaf Yancu"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    theme: united
+    toc: true
+    tod_depth: 3
+    toc_float: true
+    df_print: paged
+  pdf_document:
+    toc: true
+  word_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = TRUE,
+                      echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+# About the Course
+1. 
+
+2. 
+
+3. 
+
+# The “Tidyverse”
+
+## 1. Loading (and installing if needed) libraries with pacman
+```{r, echo=FALSE}
+pacman::p_load(tidyverse, kableExtra, usethis, git2r)
+```
+
+## 2. iris data
+```{r}
+# Loading the data
+data(iris)
+
+# Calculating the mean of the sepal length per species
+iris %>% 
+  select(starts_with("Sepal"), Species) %>% 
+  group_by(Species) %>% 
+  summarise(Average_Sepal_Length = mean(Sepal.Length, na.rm = T)) %>% 
+  kable() %>% 
+  kable_classic(full_width = F)
+
+```
+
+
+## 3. mtcars data
+```{r}
+# Loading the data
+data(mtcars)
+
+# Setting cyl as a factor
+mtcars <- mtcars %>%
+  mutate(cyl = as_factor(cyl))
+
+ggplot(mtcars, aes(x = hp, y = mpg, color = cyl)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+```
+
+# Git & GitHub
+
+## 1. Introduction to git
+```{r}
+# Using the usethis library I loaded above using pacman
+
+git2r::init()
+
+use_git_config(
+  scope = "project",
+  user.name = "assafy18",
+  user.email = "asaf.yancu@hotmail.com"
+)
+
+```
+
