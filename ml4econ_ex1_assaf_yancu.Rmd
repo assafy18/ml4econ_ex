@@ -75,13 +75,26 @@ ggplot(mtcars, aes(x = hp, y = mpg, color = cyl)) +
 # Git & GitHub
 
 ## 1. Introduction to git
-I do not need to use commands in this exercise because I have already created my current R project with a Git repository.
+```{r}
+init()
 
-## 2. Stagging, Committing and Pushing
-I can stage, commit and push in several ways:
-a. Using GitHub desktop
-b. Using the Git section in R studio
-c. Also in R studio, staging and committing using the `r use_git()` and pushing using `r use_github()` (from `r {usethis}` package) in the console.
+use_git_config(
+  scope = "project",
+  user.name = "Assaf Yancu",
+  user.email = "asaf.yancu@hotmail.com"
+)
+```
 
-## 3. Track changes
+## 2. Stagging and Committing 
+I wanted a new script in the current project `r try.R` and I now stagging and committing the changes
+```{r}
+use_git()
+```
+
+
+##3. Checking Changes
+```{r}
+status()
+```
+
 I can track changes in my repository on GitHub. By clicking on a specific file, I can see green lines for additions and red lines for deletions. I can follow these changes through the commits.
