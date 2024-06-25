@@ -18,8 +18,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = TRUE,
                       echo = TRUE,
-                      warning = FALSE,
-                      message = FALSE)
+                      warning = TRUE,
+                      message = TRUE)
 ```
 
 # About the Course
@@ -30,9 +30,9 @@ knitr::opts_chunk$set(eval = TRUE,
 
 
 3. 
-  + a. A linear regression model assumes that the outcome is linearly related to each parameter in the model when holding all others fixed. This assumption is intuitive to a counterfactual analyst who primarily interested in estimating the effect of a one unit change in the variable of interest on the outcome variable. The constant effect induced by the linearity make the results easier for casual inference and policy making.  Note that this linearity in note very restricted since the outcome is only linear in the parameter and not in the variables. For example, the linear estimated parameter of an interaction between two variables resembles the linear dependency of the main effect on another variable.
-  + b. The separability assumption refers to the ability to isolate the effects of different variables or features on an outcome without their interactions complicating the interpretation.This refers to my insight about the linearity assumption; the economist intuition is to separate the effect of the variable of interest from the effect of other features of the model. So one could interperate the regression results counterfactually, i.e., the constant effect of the treatment variable when holding all other features fixed.
-  + c. 
+  + a. A linear regression model assumes that the outcome is linearly related to each parameter in the model when holding all others fixed. This assumption is intuitive to a counterfactual analyst who primarily interested in estimating the effect of a one-unit change in the variable of interest on the outcome variable. The constant effect induced by the linearity make the results easier for casual inference and policy making.  Note that this linearity in note very restricted since the outcome is only linear in the parameter and not in the variables. For example, the linear estimated parameter of an interaction between two variables resembles the linear dependency of the main effect on another variable.
+  + b. The separability assumption refers to the ability to isolate the effects of different variables or features on an outcome without their interactions complicating the interpretation.This insight relates to the linearity assumption; economists intuitively aim to separate the effect of the variable of interest from the effects of other features in the model. Therefore, one can interpret the regression results counterfactually — i.e., the constant effect of the treatment variable when holding all other features fixed.
+  + c. Assuming that $X \sim \mathcal{N}(\mu,\,\sigma^{2})\,$ means making an assumption about the data generating process of the random variable $X$ as an alternative to using the empirical distribution of $X$. In particular, by using this assumption, one argues that $X$ as mean of 0 and variance of $\sigma^{2}$;that is, the distribution of $X$ in the real world is centered around 0.
 
 # The “Tidyverse”
 
@@ -86,15 +86,15 @@ use_git_config(
 ```
 
 ## 2. Stagging and Committing 
-I wanted a new script in the current project `r try.R` and I now stagging and committing the changes
+I wanted a new R script in the current project `try.R` and I now stagging and committing the changes
 ```{r}
 use_git()
 ```
 
 
-##3. Checking Changes
+## 3. Checking Changes
 ```{r}
 status()
 ```
 
-I can track changes in my repository on GitHub. By clicking on a specific file, I can see green lines for additions and red lines for deletions. I can follow these changes through the commits.
+I can also track changes in my repository on GitHub. By clicking on a specific file, I can see green lines for additions and red lines for deletions. I can follow these changes through the commits.
