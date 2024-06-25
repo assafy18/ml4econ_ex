@@ -1,0 +1,289 @@
+---
+title: "ML4Econ Exercise 2: Regression & Classification"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    theme: flatly
+    highlight: haddock 
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(magrittr)
+library(DataExplorer)
+library(tidymodels)
+library(kableExtra)
+library(stargazer)
+library(ROCit)
+library(caret)
+library(glmnet)
+set.seed(100)
+```
+
+```{r data, message=FALSE, echo=FALSE}
+winequality_red <- read_csv("winequality_red.csv")
+```
+
+<style>
+p.comment {
+background-color: #DBDBDB;
+padding: 10px;
+border: 1px solid black;
+margin-left: 25px;
+border-radius: 5px;
+font-style: italic;
+}
+
+</style>
+
+# Linear Regression
+
+## Preface  
+
+In this exercise we will go over some regression and classification models. Since it is a class for economists you are probably familiar with linear regression. However, good grasp of the parts of linear regression can help us in understanding other models. We can detect where those models differ from the old workhorse of linear regression. 
+
+<p class="comment">
+<strong>Question:</strong> Can you tell what are the parts of linear regression? 
+</p>
+
+Basically, when we are estimating the $\beta$'s we assume several assumptions:  
+
+1. Linearity: The effect of each `x` on the `y` is constant.
+2. Separability: The effect of each `x` on the `y` is unrelated to the effect of other `x`s'. 
+3. $E(u|X)\sim {\sf N}(0, \sigma^2)$$': Everything that should be included in the regression is in there, and the rest is diדtributed around observed values. This assumption also include homoscedasticity - no matter what the X's are - the expected error is the same.
+
+There are some more assumptions that we will not go into. 
+
+When we are estimating the $\beta$s we're basically saying that changes in the `X`'s change Y in those $\beta$s. Now imagine a set of observations of some variable of interest - test score for example, and some X's that can explain the `Y`'s. What we are seeing is just some numbers, we still can't assert any relation between the variables. Remember! The data itself can never assert causality, additional assumptions are always required. If we arguing that some variable has some effect on Y we need to explanation why this effect best fits our data.
+
+##### Exercises  
+
+1. Can we use the data for prediction without assumptions? Why? 
+
+#### Linearity  
+
+What end does the linearity assumption serve? It basically says that the effect of the dependent variable is constant. It's quite a strong assumption; even in case we accept the effect class size has on students' achievements - can we be sure the difference between 16 and 17 students in a class is the same as the difference between 34 and 35? 
+
+#### Separability   
+
+The separability assumption means that the effect of each `x` in the `X`'s  affects `Y` individually. Again, this is quite a strong assumption. Maybe the quality of the teacher doesn't play a main role in small classes, but does so in big classes? We'll see some models which don't assume separability. However, we can add some tweaks to the linear regression model by adding interactions between the `X`'s. 
+
+##### Exercises  
+
+1. What is the downside in adding interactions? (Hint: think about the ratio n/k, where n is the number of observations and k is the number of covariates)
+
+#### Normal Distribution of E(u|X) 
+
+This assumption is folding a few assumptions in it. It means that the parts in `Y` that we don't explain with x have expectancy of zero, their distribution is normal and this distribution's variance doesn't depend on X. Each of those assumptions is strong.   
+
+##### Exercises
+1. Why are these assumptions strong? Can you come up with a story that wouldn't fit?
+2. The confidence intervals of the $\beta$s derived from these assumptions. Explain how confidence intervals are derived from the assumptions (Intuitive explanation is enough).
+
+## Data
+We will use the `wine dataset` in this section. The `wine dataset` contains 1599 reviews of red wines. Every row is composed of wine characteristics and its score on a 1-8 stars scale. Start by exploring the data. 
+
+##### Exercises 
+1. Download the data from the course repo. We will use the `winequality_red` dataset.
+2. Plot the histogram of every variable. (Hint: you can use `DataExplorer` package). We get a graph simialar to the following one. 
+```{r histogram, echo=FALSE}
+plot_histogram(winequality_red)
+```
+
+3. Plot boxplots of each variable against the `quality` variable. It should look like this:  
+```{r boxplot, echo=FALSE}
+plot_boxplot(winequality_red, by = "quality")
+```
+
+## Model 
+We will now fit a model to the data. We will not do any preparations, except for dividing the data into train (on which we fit the model) and test (on which we test our model's performance). It is a very common method in ML, and a necessary one. We expect a good model to be able to predict outcomes on data it has never seen before. 
+It is recommended for this part to use `tidymodels` package. Some relevant materials can be found [here](https://rviews.rstudio.com/2019/06/19/a-gentle-intro-to-tidymodels/). 
+
+##### Exercises 
+1. Split the data to 70% train and 30% test. Save the train in `wine_train` and the test in `wine_test`. Use `set.seed(100)` at the very beginning of your code. 
+
+<p class="comment">
+<strong>Note:</strong> If you are using the tidymodels - note that juice() is not relevant in here since we didn't make any change in the data. 
+</p>
+```{r split, echo=FALSE}
+wine_split <- initial_split(winequality_red, prop = 0.7)
+wine_train <- wine_split %>% training()
+wine_test <- wine_split %>% testing()
+```
+2. Fit the model: use linear regression where the quality is the `Y` and the remained variables are the `X`'s. We should get something similar to the following.   
+
+```{r linear regression, echo=FALSE}
+wine_lm <- lm(quality ~ ., data = wine_train) 
+summary(wine_lm) %>% tidy()
+```
+3. Predict: based on the model we fitted - predict the outcome on the test set. Don't forget that the outcome are real numbers. Plot the first 6 predictions.  
+```{r prediction, echo=FALSE}
+a <-  data.frame(.pred_reg = predict(wine_lm, wine_test) %>% round()) 
+head(a)
+```
+4. Metrics: What is the `rmse`, `R-Squared` and `MAE`? 
+
+<p class="comment">
+<strong>Reminder:</strong> Root Mean Squared Error (rmse) is the square of each error, averaged, and rooted. Mean Absolute Error (MAE) is the average of the absolute error values. You should get something like this: 
+</p>
+```{r metrics, echo=FALSE}
+  cbind(.pred_reg = a$.pred_reg, wine_test) %>%
+  metrics(truth = quality, estimate = .pred_reg) %>% kable() %>% kable_styling(bootstrap_options = c("striped", "hover"))
+```
+5. Confidence intervals and t-test are essential parts of determining whether we estimated the "real" $\beta$ or not. RMSE helps as well to assert whether our model is correct or not. What is the main difference between these tests?
+
+# Logistic Regression 
+
+Thus far we thought about the dependent variable as continuous (even though it wasn't really so). Different kind of questions' focus is on discrete dependent variable, binary `Y`, in particular . 
+
+##### Exercises 
+1. Can we use linear regression for binary outcomes? Why?
+
+## Data 
+We will use "heart data" - a heart attacks dataset. Take some time to explore it.
+
+##### Exercises 
+1. Load the data from the course repo (attached on Moodle as well). Look at the data head, it should look like this:
+```{r loading data, echo=FALSE, message=FALSE}
+heart <- read_csv("heart.csv")
+head(heart)
+```
+
+2. Plot the histogram of every variable (Hint: `DataExplorer` package can be used here),we get something like the following graph. 
+```{r histogram2, echo=FALSE}
+plot_histogram(heart)
+```
+
+#### Linear Regression 
+There is no technical problem by using linear regression for binary outcomes. The problem is that estimated parameters are not probabilities - it can be over 1 and below 0. That's not a good feature for binary model. 
+
+##### Exercises 
+1. Split the data into 70% train - 30% test. Save train data in `heart_train` and test data in `heart_test`. Use `set.seed(100)` at the very beginning of the code.  
+
+```{r split2, echo=FALSE}
+heart_split <- initial_split(heart, prop = 0.7)
+heart_train <- heart_split %>% training()
+heart_test <- heart_split %>% testing()
+``` 
+
+2. Fit the model: use linear regression where the target is `Y` and the remained variables are `X`'s. We should get something similar to:   
+
+```{r linear regression2,echo=FALSE}
+heart_lm <- lm(target ~ ., data = heart_train) 
+summary(heart_lm) %>% tidy()
+```
+
+3. Predict: based on the model we fit, lets predict the outcomes of test set. Don't forget the outcome is real numbers, but before you round them plot the largest number in your prediction and the lowest one. You should get something like this: 
+```{r prediction2, echo=FALSE}
+b <-  data.frame(.pred_reg = predict(heart_lm, heart_test, type = "response")) 
+max(b)
+min(b)
+```
+Is there any problem with these numbers? 
+
+4. Metrics: Plot a ROC curve. You should get the following graph:
+```{r metrics2, echo=FALSE}
+ b <- data.frame(.pred_reg = b$.pred_reg, target = heart_test$target) 
+ROCit_obj <- rocit(score=b$.pred_reg, class=b$target)
+plot(ROCit_obj)
+```
+
+#### Logistic Regression 
+Since linear regression has some unwanted features, we can use logistic regression instead. In logistic regression we use the logistic distribution to make sure we get probabilities as our result - it can't deviate from [0,1]. 
+
+##### Exercises
+1. Train a logistic regression model by using the `glm()` function. Show summary of the results. We get something like this  
+```{r logistic regression, echo=FALSE}
+model_glm <- glm(target ~ ., data = heart_train, family = "binomial")
+summary(model_glm) 
+```
+
+2. Predict: based on the fitted model - predict outcomes of the test set. Don't forget that the outcome is real numbers, but before you round them plot the largest number in your prediction and the lowest one. You should get something like this:
+
+```{r logistic prediction, echo=FALSE}
+heart_predict <- predict(model_glm,newdata = heart_test, type = "response")
+max(heart_predict)
+min(heart_predict)
+```
+
+Is there a problem with these numbers? 
+
+3. Metrics: In binary classification models we evaluate the model performance using the terms "Sensitivity", "Specificity" and "Accuracy". How can we calculate these measures? 
+Calculate it for our predictions (we can do so by using some packages). 
+```{r}
+train_tab <- table(round(heart_predict), heart_test$target)
+train_tab %>% 
+confusionMatrix()
+```
+
+# Regularization 
+The regression models we used thus far take the data and try to figure out what are the parameters fit the best. The problem is that these models "force" themselves on the reality; We can almost always find parameters that fit the data. Model predictions in this case, are reproducing in-sample values, but perform poorly on data that wasn't used for fitting the model. In other words, the model fits both the "DGP" (Data Generating Process) and the noise (the idiosyncratic parts of the data). This problem called "overfitting". In order to mitigate this problem one can use penalty in the estimation equation. Since regression is essentially a minimization problem, adding a positive term with $\beta$'s in the equation,  force omitting or shrinking parameters value. 
+
+## Ridge 
+Ridge is one specification of regularization. In ridge we are minimizing the following equation:  
+
+$$
+\sum_{i=1}^{n} \left( y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij}    \right) ^ 2 + \lambda \sum_{j=1}^{p} \beta_j^2 .
+$$
+
+The penalty is in squared value. $\lambda$ is a paramater - the higher it is, the bigger the punishment. Notice that - unlike what we know about OLS - the $\beta$ estimated by ridge is biased.
+
+##### Exercises 
+1. Another version of regularized regression is the LASSO in which the penalty is in absolute term (in other context these regularizations are called L1 and L2, after their norm term). Why is it necessary to use absolute or square term  in the penalty?
+2. Advanced: One of the features of lasso is "Variable Selection" - some of the covariates end up as zeros. This does not happen in Ridge. Why?
+
+We now use the heart dataset again. 
+
+##### Exercises 
+1. Use the `glmnet` package for this part. By `glmnet` function we can fit a ridge model. Then use the `plot` function to plot coefficients (y-axis) vs. "log - lambda" (x-axis). You should get the following graph: 
+```{r lasso fit, echo=FALSE}
+X  <-  model.matrix(target ~ ., heart_train)[, -1]
+y <- heart_train %>% select(target) %>% pull()
+fit_ridge <- glmnet(x = X,y =  y, alpha = 0, family = "binomial")
+plot(fit_ridge, xvar = "lambda", label = TRUE)
+```
+
+2. In order to actually pick the best lambda we use cross validation. Use the `cv.glmnet` function to fit a model. Use the `plot` function to show "log lambda" against the `MSE`. 
+
+```{r cv ridge, echo=FALSE}
+fit_ridge_cv <- cv.glmnet(X, y, alpha = 0)
+plot(fit_ridge_cv)
+```
+
+3. Plot the coefficients estimated by the model. Are they different than those from logit section? Are all covariates different from zero? Use `tidy` function from broom to introduce the results. 
+4. What might be problematic in terms of econometrics (as opposed to statistics) when a covariate equals zero? (We return to this question down the course road)
+```{r lasso coef, echo=FALSE}
+#coef(fit_ridge_cv)
+#broom::tidy(fit_ridge_cv)
+```
+5. Predict: Use the fitted model and predict the `target` variable. Use two different $\lambda$'s: the minimal $\lambda$, and the `1se` $\lambda$ (use the s argument in the predict function). Compare these results, compare it to the logistic regression, too.  
+
+```{r predictons, echo=FALSE}
+X1  <-  model.matrix(target ~ ., heart_test)[, -1]
+y1 <- heart_train %>% select(target) %>% pull()
+first_pred <- predict(fit_ridge_cv, X1, s = "lambda.min")
+second_pred <- predict(fit_ridge_cv, X1)
+```
+
+6. Metrics: Create confusion matrix for each prediction. It should look like this: 
+```{r confusion lasso, echo=FALSE}
+train_tab2 <- table(round(first_pred), heart_test$target)
+train_tab2 %>% 
+confusionMatrix()
+
+train_tab3 <- table(round(second_pred), heart_test$target)
+train_tab3 %>% 
+confusionMatrix()
+
+```
+
+Good Luck!

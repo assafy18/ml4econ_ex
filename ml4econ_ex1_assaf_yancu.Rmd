@@ -30,8 +30,9 @@ knitr::opts_chunk$set(eval = TRUE,
 
 
 3. 
-  + 3a.
-  + 3b.
+  + a. A linear regression model assumes that the outcome is linearly related to each parameter in the model when holding all others fixed. This assumption is intuitive to a counterfactual analyst who primarily interested in estimating the effect of a one unit change in the variable of interest on the outcome variable. The constant effect induced by the linearity make the results easier for casual inference and policy making.  Note that this linearity in note very restricted since the outcome is only linear in the parameter and not in the variables. For example, the linear estimated parameter of an interaction between two variables resembles the linear dependency of the main effect on another variable.
+  + b. The separability assumption refers to the ability to isolate the effects of different variables or features on an outcome without their interactions complicating the interpretation.This refers to my insight about the linearity assumption; the economist intuition is to separate the effect of the variable of interest from the effect of other features of the model. So one could interperate the regression results counterfactually, i.e., the constant effect of the treatment variable when holding all other features fixed.
+  + c. 
 
 # The “Tidyverse”
 
